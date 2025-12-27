@@ -1,16 +1,6 @@
-## Release v0.1.77
+## Release v0.1.78
 
-### ✨ Features
-(none)
-
-### 🐞 Fixes
-(none)
-
-### 🔧 Refactors
-(none)
-
-### 📚 Docs
-(none)
-
-### 🧹 Chores
-(none)
+- feat: initial project structure and release script
+- done
+- create doc.md file with initial contentInitial commit
+- Initial commit
