@@ -1,3 +1,3 @@
-## Release v0.1.83
+## Release v0.1.84
 
-- docs(chore): auto commit before release
+- docs(chore): update docs and scripts
