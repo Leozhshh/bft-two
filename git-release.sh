@@ -7,7 +7,7 @@ set -e
 SERVER_USER="zhshh"
 SERVER_HOST="4.241.224.39"
 SERVER_PATH="/home/zhshh/bft_release"
-KEY_PATH="$HOME/.ssh/id_ed25519.pub"
+KEY_PATH="$HOME/.ssh/id_rsa"
 
 VERSION_FILE="VERSION"
 NOTES_FILE="RELEASE_NOTES.md"
