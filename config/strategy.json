@@ -1,0 +1,8 @@
+{
+  "position_sizing": {
+    "risk_fraction": 0.02,
+    "atr_multiplier": 1.5,
+    "min_notional": 10,
+    "max_notional_fraction": 0.2
+  }
+}

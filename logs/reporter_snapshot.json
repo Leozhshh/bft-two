@@ -1,0 +1,12 @@
+{
+  "ETHUSDT": {
+    "side": "NONE",
+    "qty": 0.0,
+    "entry_price": 0.0
+  },
+  "SOLUSDT": {
+    "side": "NONE",
+    "qty": 0.0,
+    "entry_price": 0.0
+  }
+}

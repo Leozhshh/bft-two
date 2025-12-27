@@ -1,0 +1,6 @@
+{
+  "factor_report_interval": 10,
+  "risk_factor": 0.01,
+  "max_position_ratio": 0.03,
+  "default_leverage": 20
+}

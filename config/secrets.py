@@ -1,0 +1,10 @@
+API_KEY = "3IcvHlVGi4do8LRY0WOzoIpWk2eMhPomxsgun974hCUHzUj5bFYdvEgJBlUq2Isl"
+API_SECRET = "Q1pb3R6NVOy57U7osQiYTR4hGHDwkNoarrpkfvIGHrwNQWiZcXRWWeekTejBvlqK"
+
+# ✅ 模拟测试：True
+# ✅ 真实交易：False
+USE_TESTNET = True
+
+# ✅ Telegram Bot 配置
+TELEGRAM_BOT_TOKEN = "7847927883:AAEvjGucrUiASlJ8PgcmJVAKujxrqPyeclI"
+TELEGRAM_CHAT_ID = "-4905419701"

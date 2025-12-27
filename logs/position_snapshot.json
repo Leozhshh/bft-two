@@ -1,0 +1,18 @@
+{
+  "ETHUSDT": {
+    "side": "NONE",
+    "qty": 0.0,
+    "entry_price": 0.0,
+    "entry_time": null,
+    "last_signal": "HOLD",
+    "partial_take_profit_done": false
+  },
+  "SOLUSDT": {
+    "side": "NONE",
+    "qty": 0.0,
+    "entry_price": 0.0,
+    "entry_time": null,
+    "last_signal": "HOLD",
+    "partial_take_profit_done": false
+  }
+}

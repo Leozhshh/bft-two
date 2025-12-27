@@ -1,0 +1,12 @@
+# readme for setting up the Binance Algo Trading Environment
+# Step 1: Install Anaconda (if not already installed)（root step）
+# wget https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh
+# curl -O https://repo.anaconda.com/archive/Anaconda3-2025.06-0-Linux-x86_64.sh
+# chmod +x Anaconda3-2025.06-0-Linux-x86_64.sh
+# Step 2: Initialize Conda
+# bash Anaconda3-2025.06-0-Linux-x86_64.sh
+# source ./anaconda3/etc/profile.d/conda.sh
+# echo "./anaconda3/etc/profile.d/conda.sh" >> ~/.bashrc
+# conda create -n bft python=3.10
+# conda activate binance
+# conda deactivate
