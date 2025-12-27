@@ -9,16 +9,6 @@ SERVER_USER="zhshh"
 SERVER_HOST="4.241.224.39"
 SERVER_PATH="/home/zhshh/bft_release"
 
-# ------------------------------
-# SSH 私钥配置
-# ------------------------------
-KEY_PATH="/Users/leo.zhai/OneDrive/SSHconnectionKeys/az1000d-sshkey.pem"
-
-
-# Telegram 通知配置
-TELEGRAM_BOT_TOKEN="7847927883:AAEvjGucrUiASlJ8PgcmJVAKujxrqPyeclI"
-TELEGRAM_CHAT_ID="-4905419701"
-
 VERSION_FILE="VERSION"
 NOTES_FILE="RELEASE_NOTES.md"
 
