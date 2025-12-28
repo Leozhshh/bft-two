@@ -1,3 +1,3 @@
-## Release v0.1.93
+## Release v0.1.94
 
-- docs(chore): auto update docs and scripts
+
