@@ -109,12 +109,24 @@ def handle_position(symbol, effective_signal, sym_snap, ctx, min_qty, now_ts, wr
     # 有持仓 → 先检查止盈条件
     # ================================
     if entry_price > 0 and qty > 0:
-        # 计算当前盈亏百分比
-        _, pnl_pct = calc_pnl_and_pct(side, entry_price, current_price)
+        # 获取实际盈亏（已考虑杠杆）
+        unrealized_pnl = ctx["position"].get("unrealized_pnl", 0.0)
         
-        # 止盈逻辑：15%全平
-        if pnl_pct >= 15.0:
-            write_log(f"[{symbol}] 🎯 止盈触发：获利 {pnl_pct:.2f}% >= 15%，全部平仓")
+        # 计算价格变动百分比（用于显示）
+        _, price_pct = calc_pnl_and_pct(side, entry_price, current_price)
+        
+        # 计算相对于账户余额的盈亏百分比（考虑杠杆后的实际盈亏）
+        # 使用账户初始余额作为基准（balance - unrealized_pnl）
+        account_base = balance - unrealized_pnl
+        if account_base > 0:
+            pnl_pct_account = (unrealized_pnl / account_base) * 100
+        else:
+            # 如果账户基准为0或负数，使用价格变动百分比
+            pnl_pct_account = price_pct
+        
+        # 止盈逻辑：15%全平（基于账户盈亏百分比）
+        if pnl_pct_account >= 15.0:
+            write_log(f"[{symbol}] 🎯 止盈触发：账户获利 {pnl_pct_account:.2f}% >= 15%（价格变动 {price_pct:.2f}%），全部平仓")
             
             if side == "LONG":
                 close_result = place_market_order(symbol, "SELL", qty)
@@ -122,15 +134,17 @@ def handle_position(symbol, effective_signal, sym_snap, ctx, min_qty, now_ts, wr
                 close_result = place_market_order(symbol, "BUY", qty)
             
             if close_result.is_success():
-                pnl_usdt, _ = calc_pnl_and_pct(side, entry_price, close_result.avg_price)
+                pnl_usdt, price_pct_close = calc_pnl_and_pct(side, entry_price, close_result.avg_price)
+                # 计算实际账户盈亏百分比
+                pnl_pct_account_close = (pnl_usdt / account_base * 100) if account_base > 0 else price_pct_close
                 notify_close(symbol, side, close_result.qty, entry_price, close_result.avg_price,
-                           format_pnl(pnl_usdt), format_pct(pnl_pct), "止盈15%全平", balance)
+                           format_pnl(pnl_usdt), format_pct(pnl_pct_account_close), "止盈15%全平", balance)
                 
                 # 详细交易日志
                 log_trade(
                     f"🎯 {symbol} 止盈15%全平 | 方向: {side} | 数量: {close_result.qty} 张 | "
                     f"开仓价: {entry_price:.2f} | 平仓价: {close_result.avg_price:.2f} | "
-                    f"盈亏: {format_pnl(pnl_usdt)} ({format_pct(pnl_pct)}) | "
+                    f"盈亏: {format_pnl(pnl_usdt)} (账户: {format_pct(pnl_pct_account_close)}, 价格: {format_pct(price_pct_close)}) | "
                     f"账户余额: {balance:.2f} USDT | 等待下一波段信号",
                     module="position_handler"
                 )
@@ -152,9 +166,9 @@ def handle_position(symbol, effective_signal, sym_snap, ctx, min_qty, now_ts, wr
                 write_log(f"[{symbol}] ❌ 止盈平仓失败: {close_result.error or close_result.warning}")
                 return sym_snap
         
-        # 止盈逻辑：10%卖50%（仅执行一次）
-        elif pnl_pct >= 10.0 and not sym_snap.get("partial_take_profit_done", False):
-            write_log(f"[{symbol}] 🎯 部分止盈触发：获利 {pnl_pct:.2f}% >= 10%，卖出50%")
+        # 止盈逻辑：10%卖50%（仅执行一次，基于账户盈亏百分比）
+        elif pnl_pct_account >= 10.0 and not sym_snap.get("partial_take_profit_done", False):
+            write_log(f"[{symbol}] 🎯 部分止盈触发：账户获利 {pnl_pct_account:.2f}% >= 10%（价格变动 {price_pct:.2f}%），卖出50%")
             
             # 计算卖出数量（50%）
             close_qty = qty * 0.5
@@ -174,20 +188,23 @@ def handle_position(symbol, effective_signal, sym_snap, ctx, min_qty, now_ts, wr
                 close_result = place_market_order(symbol, "BUY", close_qty)
             
             if close_result.is_success():
-                pnl_usdt, _ = calc_pnl_and_pct(side, entry_price, close_result.avg_price)
+                pnl_usdt, price_pct_partial = calc_pnl_and_pct(side, entry_price, close_result.avg_price)
                 remaining_qty = qty - close_result.qty
+                # 计算部分止盈的账户盈亏百分比（按比例）
+                pnl_usdt_partial = pnl_usdt  # 部分止盈的实际盈亏
+                pnl_pct_account_partial = (pnl_usdt_partial / account_base * 100) if account_base > 0 else price_pct_partial
                 
                 # 详细交易日志
                 log_trade(
                     f"🎯 {symbol} 部分止盈10% | 方向: {side} | 卖出: {close_result.qty} 张 | "
                     f"剩余: {remaining_qty:.4f} 张 | 开仓价: {entry_price:.2f} | "
                     f"平仓价: {close_result.avg_price:.2f} | "
-                    f"盈亏: {format_pnl(pnl_usdt)} ({format_pct(pnl_pct)})",
+                    f"盈亏: {format_pnl(pnl_usdt_partial)} (账户: {format_pct(pnl_pct_account_partial)}, 价格: {format_pct(price_pct_partial)})",
                     module="position_handler"
                 )
                 
                 write_log(f"[{symbol}] ✅ 部分止盈成功：卖出 {close_result.qty} 张，剩余 {remaining_qty:.4f} 张")
-                write_log(f"[{symbol}]   部分止盈盈亏: {format_pnl(pnl_usdt)} ({format_pct(pnl_pct)})")
+                write_log(f"[{symbol}]   部分止盈盈亏: {format_pnl(pnl_usdt_partial)} (账户: {format_pct(pnl_pct_account_partial)}, 价格: {format_pct(price_pct_partial)})")
                 
                 # 更新持仓数量
                 sym_snap["qty"] = remaining_qty

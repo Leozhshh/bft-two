@@ -26,6 +26,9 @@ from core.logic.position_handler import handle_position
 MIN_PRICE_CHANGE_PCT = 0.002
 MIN_HOLD_SECONDS = 5 * 60
 
+# 因子状态汇报去重（记录上次发送的分钟数）
+_last_factor_report_minute = None
+
 
 def _default_snap():
     return {
@@ -55,11 +58,18 @@ def run_once():
     # ================================
     # 每 10 分钟因子状态汇报
     # ================================
+    global _last_factor_report_minute
     m = time.localtime().tm_min
-    if m % 10 == 0:
-        write_log("⏱️ Big触发因子状态汇报（每 10 分钟）")
+    # 在整10分钟时触发（00、10、20、30、40、50分），且避免同一分钟内重复发送
+    if m % 10 == 0 and _last_factor_report_minute != m:
+        write_log("⏱️ 触发因子状态汇报（每 10 分钟）")
         log_system("触发因子状态汇报")
-        hourly_factor_report(symbols, client)
+        try:
+            hourly_factor_report(symbols, client)
+            _last_factor_report_minute = m  # 记录本次发送的分钟数
+        except Exception as e:
+            write_log(f"⚠️ 因子状态汇报失败: {e}")
+            log_error(f"因子状态汇报失败: {e}", module="runner")
 
     # 系统启动报告（只在首次运行时有效）
     report_startup(symbols)
